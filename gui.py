@@ -20,6 +20,8 @@ class mywindow(QtWidgets.QMainWindow):
         self.ui.sliderImage.valueChanged.connect(self.plotNextGraph)
         self.ui.buttonCaluclate.clicked.connect(self.calculate)
         self.ui.buttonClear.clicked.connect(self.clear)
+        self.l = pg.LegendItem((160,60), offset=(430,10))
+        self.l.setParentItem(self.graphWidget.graphicsItem())
 
 
     def clear(self):
@@ -39,6 +41,16 @@ class mywindow(QtWidgets.QMainWindow):
         self.ui.label_max_t.setText("0")
         self.ui.sliderImage.setMaximum(0)
         self.ui.label_current_time.setText("Индекс времени k = " + str(0))
+
+    def legend_del(self):
+        while(len(self.l.items)):
+            item, label = self.l.items[0]
+            self.l.items.remove((item, label))  # удалить линию
+            self.l.layout.removeItem(item)
+            item.close()
+            self.l.layout.removeItem(label)  # удалить надпись
+            label.close()
+            self.l.updateSize()
 
     def calculate(self):
         self.ui.label_gridInfo.setStyleSheet("color: rgb(0, 0, 0);")
@@ -65,29 +77,32 @@ class mywindow(QtWidgets.QMainWindow):
             self.ui.label_max_t.setText(str(len(answer) - 1))
             self.ui.sliderImage.setMaximum(len(answer) - 1)
             self.graphWidget.clear()
-            self.plotGraph(x, answer_analytic[0], "Температура при t=0", 'b')
-            self.plotGraph(x, y, "Температура при t=0", 'r')
+            self.legend_del()
+            self.plotGraph(x, answer_analytic[0], "Аналитическое решение при t=0", 'b')
+            self.plotGraph(x, y, "Кранка-Николсона при t=0", 'r')
             self.ui.label_gridInfo.setText(self.ui.label_gridInfo.text() +
-                                           "\nabsolute error: " + str(self.task.calculateAbsError()))
+                                           "\nabsolute error: " + str(self.task.calculateAbsError()) +
+                                           "\nРешение устойчиво: " + str(self.task.isStable()))
 
         except ValueError:
             self.ui.label_gridInfo.setStyleSheet("color: rgb(255, 0, 0);")
             self.ui.label_gridInfo.setText("Проверьте поля!")
 
     def plotNextGraph(self):
+        self.legend_del()
         t = self.ui.sliderImage.value()
         self.ui.label_current_time.setText("Индекс времени k = " + str(t))
         if(self.task != None):
             y = self.task.answer[t]
             x = self.task.r
             self.graphWidget.clear()
-            self.plotGraph(x, self.task.answer_analytic[t], "Температура при t=0", 'b')
-            self.plotGraph(x, y, "Температура при t="+str(t), 'r')
+            self.plotGraph(x, self.task.answer_analytic[t], "Аналитическое решение при t="+str(round(t*self.task.ht, 1))+" c", 'b')
+            self.plotGraph(x, y, "Кранка-Николсона при t="+str(round(t*self.task.ht, 1))+" c", 'r')
 
     def plotGraph(self, x, y, plotname, color):
         self.graphWidget.showGrid(x=True, y=True)
         pen = pg.mkPen(color=color, width=3)
-        self.graphWidget.plot(x, y, name=plotname, pen=pen)
+        self.l.addItem(self.graphWidget.plot(x, y, name=plotname, pen=pen), plotname)
 
 
 

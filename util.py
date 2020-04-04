@@ -22,6 +22,9 @@ class Task(object):
         self.answer = self.f
         return self.f
 
+    def isStable(self):
+        return (1 - (2 * self.k * self.ht) / ((self.hr ** 2) * self.c) - (self.alpha * self.ht) / (self.c * self.l)) > 0
+
     def calculateAbsError(self):
         if self.answer is not None and self.answer_analytic is not None:
             return np.max(np.abs(np.array(self.answer_analytic) - np.array(self.answer)))
