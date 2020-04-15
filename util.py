@@ -77,7 +77,7 @@ class Task(object):
         self.psi = [sp.j0(r * self.j0zeros / R) + self.Uc for r in self.r]
         self.f = []
         f = self.psi
-        f[len(f) - 1] = self.Uc
+        #f[len(f) - 1] = self.Uc
         self.f.append(f)
 
         self.A = [[0 for i in range(self.I)] for j in range(self.I)]

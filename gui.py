@@ -16,7 +16,6 @@ class mywindow(QtWidgets.QMainWindow):
         self.graphWidget.setBackground('w')
         self.graphWidget.setLabel('left', 'Температура (К)', color='red', size=30)
         self.graphWidget.setLabel('bottom', 'Радиус (см)', color='red', size=30)
-        self.ui.label_current_time.setText("Индекс времени k = " + str(0))
         self.ui.sliderImage.valueChanged.connect(self.plotNextGraph)
         self.ui.buttonCaluclate.clicked.connect(self.calculate)
         self.ui.buttonClear.clicked.connect(self.clear)
@@ -40,7 +39,8 @@ class mywindow(QtWidgets.QMainWindow):
         self.ui.label_gridInfo.setText("")
         self.ui.label_max_t.setText("0")
         self.ui.sliderImage.setMaximum(0)
-        self.ui.label_current_time.setText("Индекс времени k = " + str(0))
+        self.ui.label_current_time.setText("Индекс времени k = ")
+        self.ui.label_current_time_2.setText("Время t = ")
 
     def legend_del(self):
         while(len(self.l.items)):
@@ -78,11 +78,15 @@ class mywindow(QtWidgets.QMainWindow):
             self.ui.sliderImage.setMaximum(len(answer) - 1)
             self.graphWidget.clear()
             self.legend_del()
+            self.ui.label_current_time.setText("Индекс времени k = " + str(0))
+            self.ui.label_current_time_2.setText("Время t = " + str(0) + " c")
             self.plotGraph(x, answer_analytic[0], "Аналитическое решение при t=0", 'b')
             self.plotGraph(x, y, "Кранка-Николсона при t=0", 'r')
             self.ui.label_gridInfo.setText(self.ui.label_gridInfo.text() +
                                            "\nabsolute error: " + str(self.task.calculateAbsError()) +
-                                           "\nРешение устойчиво: " + str(self.task.isStable()))
+                                           "\nРешение устойчиво: " + str(self.task.isStable()) +
+                                           "\nhr = " + str(self.task.hr) + "\tht = " + str(self.task.ht)
+                                           )
 
         except ValueError:
             self.ui.label_gridInfo.setStyleSheet("color: rgb(255, 0, 0);")
@@ -92,6 +96,7 @@ class mywindow(QtWidgets.QMainWindow):
         self.legend_del()
         t = self.ui.sliderImage.value()
         self.ui.label_current_time.setText("Индекс времени k = " + str(t))
+        self.ui.label_current_time_2.setText("Время t = " + str(round(t*self.task.ht, 2)) + " c")
         if(self.task != None):
             y = self.task.answer[t]
             x = self.task.r
